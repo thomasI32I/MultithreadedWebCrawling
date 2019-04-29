@@ -21,7 +21,10 @@ public class WebCrawler implements Runnable {
 	private String currentElement[];
 	private String url;
 	private String layer;
+	//An html document
 	private Document currentDoc;
+	//Extended Array List of elements. An element is a HTML page consisting of
+	//a tag name, attributes, and child nodes.
 	private Elements currentLinks;
 	
 	private WebCrawlerListener listener;
