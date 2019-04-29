@@ -18,21 +18,21 @@ public class WebCrawler implements Runnable {
 	private LinkedBlockingQueue<String[]> sharedUrlPool;
 	private Set<String> urlsVisited;
 	
-	private String element[];
+	private String currentElement[];
 	private String url;
 	private String layer;
-	private Document doc;
-	private Elements links;
+	private Document currentDoc;
+	private Elements currentLinks;
 	
 	private WebCrawlerListener listener;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param name
-	 * @param SharedUrlPool
-	 * @param urlsVisited
-	 * @param urlsLimit
+	 * @param name The name of this web crawler.
+	 * @param SharedUrlPool Pool of urls which is used as FIFO storage.
+	 * @param urlsVisited Current number of urls which are visited.
+	 * @param urlsLimit Maximum number of urls to be visited.
 	 */
 	public WebCrawler(String name,
 					  LinkedBlockingQueue<String[]> SharedUrlPool,
@@ -53,20 +53,20 @@ public class WebCrawler implements Runnable {
 		
 		while (urlsVisited.size() < urlsLimit) {
 			try {
-				element = sharedUrlPool.take(); // wait here if no elements are in queue
-				url = element[0];
-				layer = element[1];
+				currentElement = sharedUrlPool.take(); // wait here if no elements are in queue
+				url = currentElement[0];
+				layer = currentElement[1];
 
 			} catch (InterruptedException e) {
 				e.getMessage();
 			}
 
 			// ensure connection to url is valid and that it hasn't been scraped already
-			if (checkUrl(url)) {
+			if (checkAndProcessUrl(url)) {
 				System.out.println(urlsVisited.size() + " " + name + " scraping " + url + " at layer: " + layer);
 				
 				int newLayer = Integer.parseInt(layer) + 1;
-				for (Element link : links) {
+				for (Element link : currentLinks) {
 					String element[] = { link.attr("abs:href"), ("" + newLayer) };
 					 // exclude duplicate links on same page
 					if (!urlsVisited.contains(element[0])) {
@@ -84,9 +84,9 @@ public class WebCrawler implements Runnable {
 	 * Check the passed url.
 	 * 
 	 * @param url
-	 * @return
+	 * @return 
 	 */
-	public boolean checkUrl(String url) {
+	public boolean checkAndProcessUrl(String url) {
 		boolean flag = false;
 		if (connectToUrl(url) && urlsVisited.add(url) && urlsVisited.size() <= urlsLimit) {
 			flag = true;
@@ -95,8 +95,8 @@ public class WebCrawler implements Runnable {
 	}
 	
 	/**
-	 * Check if connection to url is established and store html doc with elements
-	 * in corresponding object.
+	 * Check if connection to the currently observed url is established and store
+	 * its html doc with elements in corresponding object.
 	 * 
 	 * @param url
 	 * @return
@@ -105,8 +105,8 @@ public class WebCrawler implements Runnable {
 		boolean success;
 		if (url != null) {
 			try {
-				doc = Jsoup.connect(url).get();
-				links = doc.select("a[href]");
+				currentDoc = Jsoup.connect(url).get();
+				currentLinks = currentDoc.select("a[href]");
 				success = true;
 			} catch (IOException e) {
 				e.getMessage();
