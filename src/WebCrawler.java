@@ -86,7 +86,7 @@ public class WebCrawler implements Runnable {
 	 * @param url
 	 * @return 
 	 */
-	public boolean checkAndProcessUrl(String url) {
+	private boolean checkAndProcessUrl(String url) {
 		boolean flag = false;
 		if (connectToUrl(url) && urlsVisited.add(url) && urlsVisited.size() <= urlsLimit) {
 			flag = true;
@@ -101,7 +101,7 @@ public class WebCrawler implements Runnable {
 	 * @param url
 	 * @return
 	 */
-	public boolean connectToUrl(String url) {
+	private boolean connectToUrl(String url) {
 		boolean success;
 		if (url != null) {
 			try {
